@@ -3,13 +3,14 @@
 """
 SheVan website build script.
 
-Usage:
-    python build.py                # build to dist/
-    python build.py --inline       # build + inline assets (self-contained pages)
-    python build.py --out custom/  # build to custom directory
+Default behaviour: writes the generated HTML files directly into the
+REPO ROOT, so GitHub Pages can serve them immediately from `main` branch
+without any extra configuration.
 
-The output is a static site — no server, no database. Drop dist/ into
-any web hosting (Netlify, Vercel, IONOS, GitHub Pages, etc).
+Usage:
+    python build.py                # build into repo root
+    python build.py --inline       # also inline CSS + logos in each HTML
+    python build.py --out custom/  # build to a custom directory
 """
 import argparse
 import sys
@@ -25,8 +26,8 @@ from src.inliner import inline_assets
 def main():
     parser = argparse.ArgumentParser(description="Build the SheVan static website.")
     parser.add_argument(
-        "--out", type=Path, default=REPO_ROOT / "dist",
-        help="Output directory (default: dist/)",
+        "--out", type=Path, default=REPO_ROOT,
+        help="Output directory (default: repo root, ready for GitHub Pages)",
     )
     parser.add_argument(
         "--assets", type=Path, default=REPO_ROOT / "assets",
@@ -34,8 +35,7 @@ def main():
     )
     parser.add_argument(
         "--inline", action="store_true",
-        help="Inline CSS and base64-encode logos into every HTML "
-             "(makes each page self-contained for local preview).",
+        help="Inline CSS and base64-encode logos into every HTML.",
     )
     args = parser.parse_args()
 

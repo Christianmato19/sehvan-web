@@ -215,9 +215,9 @@ def render_overview_page(key, title_seo, description, intro_eyebrow,
       </a>'''
 
     cols = "cols-3" if len(items) <= 6 else "cols-4"
-    title_label = "Camperizaciones" if key == "camperizaciones" else \
-                  "Accesorios" if key == "accesorios" else \
-                  "Taller"
+    title_label = ("Camperizaciones" if key == "camperizaciones"
+                   else "Accesorios" if key == "accesorios"
+                   else "Taller")
 
     return f'''
 {head}
@@ -310,11 +310,7 @@ def render_detail_page(item, all_in_category, depth=1):
 </section>'''
 
     quote_html = f'<div class="detail-quote">{item["quote"]}</div>' if item.get("quote") else ""
-
-    if item["category_slug"] == "taller":
-        cta_label = "Reservar cita en taller"
-    else:
-        cta_label = "Solicitar presupuesto"
+    cta_label = "Reservar cita en taller" if item["category_slug"] == "taller" else "Solicitar presupuesto"
 
     related_items = [x for x in all_in_category if x["slug"] != item["slug"]][:6]
     related_html = ""
@@ -604,16 +600,7 @@ def render_contact_page() -> str:
 # ============================================================
 
 def build_all(out_dir: Path, assets_dir: Path) -> list:
-    """
-    Render every page and write to out_dir, mirroring URL structure.
-
-    Args:
-        out_dir: target directory (typically `dist/`).
-        assets_dir: source for static assets (logos).
-
-    Returns:
-        List of relative paths written, ordered by sitemap depth.
-    """
+    """Render every page to out_dir, mirroring the public URL structure."""
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "camperizaciones").mkdir(exist_ok=True)
     (out_dir / "accesorios").mkdir(exist_ok=True)
@@ -621,76 +608,66 @@ def build_all(out_dir: Path, assets_dir: Path) -> list:
 
     pages = []
 
-    # Static assets ---------------------------------------------------
+    # Static assets
     (out_dir / "styles.css").write_text(CSS, encoding="utf-8")
     pages.append("styles.css")
-
     for asset in ("logo-yellow.png", "logo-black.png"):
         shutil.copy2(assets_dir / asset, out_dir / asset)
         pages.append(asset)
 
-    # Home ------------------------------------------------------------
+    # Home
     (out_dir / "index.html").write_text(render_home_page(), encoding="utf-8")
     pages.append("index.html")
 
-    # Camperizaciones overview + 3 details ---------------------------
-    camperizaciones_overview = render_overview_page(
+    # Camperizaciones (overview + 3 details)
+    (out_dir / "camperizaciones.html").write_text(render_overview_page(
         key="camperizaciones",
         title_seo="Camperizaciones a medida en Sabadell, Barcelona | SheVan",
         description="Camperización completa de furgonetas en Sabadell. Gran Volumen (Ducato, Sprinter), Medianas y Pequeñas (T6, Vito, Trafic) y homologaciones. Pide presupuesto.",
         intro_eyebrow="Camperizaciones",
         intro_title="Una furgo no es <em>un coche.</em> Es una casa con ruedas.",
         intro_lead="Hacemos camperización completa, desde cero, adaptando cada centímetro a cómo viajas. Tres planteamientos según el tamaño y la intención de tu vehículo.",
-        items=CAMPERIZACIONES_SUB,
-        depth=0,
-    )
-    (out_dir / "camperizaciones.html").write_text(camperizaciones_overview, encoding="utf-8")
+        items=CAMPERIZACIONES_SUB, depth=0,
+    ), encoding="utf-8")
     pages.append("camperizaciones.html")
-
     for item in CAMPERIZACIONES_SUB:
-        html = render_detail_page(item, CAMPERIZACIONES_SUB, depth=1)
-        (out_dir / "camperizaciones" / f"{item['slug']}.html").write_text(html, encoding="utf-8")
+        (out_dir / "camperizaciones" / f"{item['slug']}.html").write_text(
+            render_detail_page(item, CAMPERIZACIONES_SUB, depth=1), encoding="utf-8")
         pages.append(f"camperizaciones/{item['slug']}.html")
 
-    # Accesorios overview + 11 details -------------------------------
-    accesorios_overview = render_overview_page(
+    # Accesorios (overview + 11 details)
+    (out_dir / "accesorios.html").write_text(render_overview_page(
         key="accesorios",
         title_seo="Accesorios e instalaciones para Camper y Autocaravana en Sabadell, Barcelona | SheVan",
         description="Instalación de accesorios para campers y autocaravanas en Sabadell: paneles solares, baterías litio, calefacción Webasto, aire acondicionado, techo elevable Reimo, ventanas, claraboyas. Pide presupuesto.",
         intro_eyebrow="Accesorios e instalaciones",
         intro_title="Mejora tu camper <em>o autocaravana,</em> a tu ritmo.",
         intro_lead="Si ya tienes camper o autocaravana y quieres mejorarla, instalamos los accesorios que la van a transformar. Energía, climatización, seguridad, exterior… Lo que necesite tu forma de viajar.",
-        items=ACCESORIOS,
-        depth=0,
-    )
-    (out_dir / "accesorios.html").write_text(accesorios_overview, encoding="utf-8")
+        items=ACCESORIOS, depth=0,
+    ), encoding="utf-8")
     pages.append("accesorios.html")
-
     for item in ACCESORIOS:
-        html = render_detail_page(item, ACCESORIOS, depth=1)
-        (out_dir / "accesorios" / f"{item['slug']}.html").write_text(html, encoding="utf-8")
+        (out_dir / "accesorios" / f"{item['slug']}.html").write_text(
+            render_detail_page(item, ACCESORIOS, depth=1), encoding="utf-8")
         pages.append(f"accesorios/{item['slug']}.html")
 
-    # Taller overview + 5 details ------------------------------------
-    taller_overview = render_overview_page(
+    # Taller (overview + 5 details)
+    (out_dir / "taller.html").write_text(render_overview_page(
         key="taller",
         title_seo="Taller de Reparaciones de Camper y Autocaravana en Sabadell, Barcelona | SheVan",
         description="Taller especializado en campers y autocaravanas en Sabadell. Reparaciones eléctricas, sistemas de agua, filtraciones, gas, mobiliario. Reserva cita.",
         intro_eyebrow="Taller y reparaciones",
         intro_title="Tu camper o autocaravana, <em>siempre a punto.</em>",
         intro_lead="No solo construimos furgonetas desde cero — también somos tu taller de confianza para mantenimiento, reparación y mejora de campers y autocaravanas. Diagnosticamos el problema y te devolvemos la tranquilidad.",
-        items=TALLER_SECCIONES,
-        depth=0,
-    )
-    (out_dir / "taller.html").write_text(taller_overview, encoding="utf-8")
+        items=TALLER_SECCIONES, depth=0,
+    ), encoding="utf-8")
     pages.append("taller.html")
-
     for item in TALLER_SECCIONES:
-        html = render_detail_page(item, TALLER_SECCIONES, depth=1)
-        (out_dir / "taller" / f"{item['slug']}.html").write_text(html, encoding="utf-8")
+        (out_dir / "taller" / f"{item['slug']}.html").write_text(
+            render_detail_page(item, TALLER_SECCIONES, depth=1), encoding="utf-8")
         pages.append(f"taller/{item['slug']}.html")
 
-    # Proyectos & contacto -------------------------------------------
+    # Proyectos & contacto
     (out_dir / "proyectos.html").write_text(render_projects_page(), encoding="utf-8")
     pages.append("proyectos.html")
     (out_dir / "contacto.html").write_text(render_contact_page(), encoding="utf-8")

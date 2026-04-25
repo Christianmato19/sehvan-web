@@ -1,27 +1,29 @@
 # SheVan — Web
 
-Sitio web multipágina para [SheVan](https://shevanbarcelona.es), camperizadora artesanal en Sabadell, Barcelona.
+Sitio web multipágina para **SheVan**, camperizadora artesanal en Sabadell, Barcelona.
 
-Sitio estático generado desde Python — **25 páginas indexables**, optimizado para SEO local (Sabadell, Barcelona, Catalunya), responsive y desplegable en cualquier hosting (Netlify, Vercel, GitHub Pages, IONOS, lo que sea).
+25 páginas, optimizado para SEO local, listo para servir desde GitHub Pages, Netlify, Vercel o cualquier hosting estático.
 
 ---
 
-## 🚀 Quick start
+## 🚀 Cómo verlo online (GitHub Pages — gratis, en 2 minutos)
 
-Necesitas Python 3.8 o superior. **Sin dependencias externas** — solo stdlib.
+Una vez subido este repo a tu cuenta de GitHub:
 
-```bash
-git clone <este-repo>
-cd shevan-web
+1. Ve a tu repo → pestaña **Settings**
+2. En el menú lateral → **Pages**
+3. En "Source" → selecciona:
+   - Branch: `main`
+   - Folder: `/ (root)`
+4. Click **Save**
+5. Espera 1–2 minutos
+6. La URL aparecerá en la misma página, algo como:
+   ```
+   https://TU-USUARIO.github.io/NOMBRE-DEL-REPO/
+   ```
+7. **Esa URL es la que pasas a tu prima.** Funciona en móvil, tablet y desktop.
 
-# Generar el sitio
-python build.py
-
-# Generar con CSS y logos inlineados (cada página = archivo autónomo)
-python build.py --inline
-```
-
-El sitio se genera en `dist/`. Ábrelo en navegador con `open dist/index.html` (o doble click en el archivo).
+> 💡 Si la URL devuelve 404 los primeros minutos, espera un poco — GitHub Pages tarda algo de tiempo la primera vez.
 
 ---
 
@@ -29,117 +31,121 @@ El sitio se genera en `dist/`. Ábrelo en navegador con `open dist/index.html` (
 
 ```
 shevan-web/
-├── build.py                    # Punto de entrada CLI
-├── src/                        # Generador (Python)
-│   ├── shared.py               # CSS y datos de contacto (config global)
-│   ├── data.py                 # Contenido editable de cada servicio
-│   ├── templates.py            # Renderizadores: head, nav, footer…
-│   ├── builder.py              # Lógica de páginas y build_all()
-│   └── inliner.py              # Inliner opcional de assets
-├── assets/                     # Logos fuente (PNG)
-│   ├── logo-yellow.png
-│   └── logo-black.png
-├── dist/                       # Sitio generado (git-ignorable)
-│   ├── index.html
-│   ├── styles.css
-│   ├── camperizaciones.html  +  camperizaciones/{...}.html
-│   ├── accesorios.html       +  accesorios/{...}.html
-│   ├── taller.html           +  taller/{...}.html
-│   ├── proyectos.html
-│   └── contacto.html
+├── index.html                  ← HOME (raíz del sitio)
+├── styles.css
+├── logo-yellow.png
+├── logo-black.png
+├── camperizaciones.html
+├── camperizaciones/
+│   ├── gran-volumen.html
+│   ├── medianas-pequenas.html
+│   └── homologaciones.html
+├── accesorios.html
+├── accesorios/
+│   ├── segunda-bateria.html
+│   ├── paneles-solares.html
+│   ├── inversor.html
+│   ├── calefaccion.html
+│   ├── aire-acondicionado.html
+│   ├── aislamiento.html
+│   ├── ventanas-claraboyas.html
+│   ├── techo-elevable.html
+│   ├── cierres-seguridad.html
+│   ├── toldo-portabicis.html
+│   └── suspension-neumatica.html
+├── taller.html
+├── taller/
+│   ├── electrica.html
+│   ├── agua.html
+│   ├── filtraciones.html
+│   ├── gas.html
+│   └── mobiliario.html
+├── proyectos.html
+├── contacto.html
+│
+├── .nojekyll                   ← le dice a GitHub Pages: sirve los archivos tal cual
 ├── README.md
-└── DEPLOY.md                   # Guía de despliegue paso a paso
+├── DEPLOY.md                   ← guía de otras opciones de despliegue
+├── .gitignore
+├── build.py                    ← script para regenerar el sitio
+│
+├── src/                        ← código Python del generador
+│   ├── shared.py               ← CSS + datos de contacto
+│   ├── data.py                 ← contenido editable (servicios, textos)
+│   ├── templates.py            ← head, nav, footer, iconos
+│   ├── builder.py              ← lógica de renderizado
+│   └── inliner.py              ← inliner opcional para previews offline
+│
+└── assets/                     ← logos fuente (PNG)
+    ├── logo-yellow.png
+    └── logo-black.png
 ```
+
+GitHub Pages servirá automáticamente todos los HTML de la raíz. Las carpetas `src/` y `assets/` son código del generador — no afectan al sitio público.
 
 ---
 
-## ✏️ Cómo editar el contenido
+## ✏️ Editar el contenido
 
-**El contenido vive en `src/data.py`** — diccionarios de Python con título, descripción, meta SEO, etc. de cada servicio.
-
-Por ejemplo, para cambiar el texto del servicio "Techo Elevable":
+**Los textos están en `src/data.py`** — un archivo Python con diccionarios. Por ejemplo:
 
 ```python
-# src/data.py
 {
     "slug": "techo-elevable",
     "title": "Techo Elevable",
     "lead": "¿Sientes que a tu aventura le falta espacio?",
-    "intro": "El techo elevable es la transformación definitiva...",
     # ...edita aquí
 }
 ```
 
-Después regenera el sitio con `python build.py`.
+**Datos de contacto** (teléfono, email, dirección): `src/shared.py` → `CONTACT`.
 
-**Datos de contacto** (teléfono, email, dirección, horario): `src/shared.py` → `CONTACT`.
+**CSS / colores**: `src/shared.py` → variable `CSS`. Los tokens del principio (`--yellow`, `--ink`, etc.) son los colores base.
 
-**Estilos CSS**: `src/shared.py` → variable `CSS`. Cambia los tokens al principio (`--yellow`, `--ink`, etc.) si quieres tocar el color base.
+Después de editar, regenera el sitio:
+
+```bash
+python build.py
+```
+
+Luego haz commit y push de los HTML actualizados — GitHub Pages republica solo.
 
 ---
 
-## 🌐 Despliegue
+## 🔧 Otras formas de desplegarlo
 
-Mira [DEPLOY.md](./DEPLOY.md) para la guía completa. Resumen rápido:
-
-- **Netlify / Vercel**: arrastra `dist/` a la web del servicio → URL inmediata gratis.
-- **GitHub Pages**: en settings del repo, source = `dist/` → publicado automáticamente.
-- **Hosting tradicional (IONOS, Hostinger…)**: subir `dist/` por FTP a `public_html/`.
+Si prefieres un dominio propio o más control, mira [DEPLOY.md](./DEPLOY.md) para Netlify, Vercel y hosting tradicional.
 
 ---
 
 ## 🔍 SEO
 
-Cada página tiene:
-- `<title>` y `<meta description>` únicos optimizados por keyword
-- Schema.org `LocalBusiness` / `AutoRepair` / `Service` (JSON-LD)
-- Open Graph + Twitter Card
-- Geo tags (Sabadell, Catalunya, lat/lng)
-- Canonical URL
-- Breadcrumbs HTML semánticos
+Cada página tiene `<title>` y `<meta description>` únicos optimizados por keyword, schema.org JSON-LD, Open Graph, geo tags y canonical URLs.
 
-URLs limpias y jerárquicas para indexación independiente:
-
-| URL | Keyword principal |
-|-----|------------------|
-| `/camperizaciones/gran-volumen.html` | camperizar Ducato Sabadell |
-| `/camperizaciones/medianas-pequenas.html` | camperizar VW T6 Barcelona |
-| `/accesorios/techo-elevable.html` | instalar techo elevable Reimo |
-| `/accesorios/calefaccion.html` | calefacción Webasto camper |
-| `/taller/filtraciones.html` | reparar filtración camper |
-
-**Pendiente para que el SEO trabaje al 100%** (no es código, es configuración):
-- [ ] Google Business Profile (esto es el 50% del SEO local)
-- [ ] Google Search Console + sitemap.xml + robots.txt
-- [ ] Reseñas en Google de clientes
-- [ ] Sustituir las imágenes placeholder por fotos reales con `alt` descriptivo
+**Pendiente para SEO completo** (no es código, es configuración externa):
+- Google Business Profile (es el 50% del SEO local)
+- Google Search Console + sitemap.xml
+- Reseñas en Google de clientes
+- Sustituir las imágenes placeholder por fotos reales
 
 ---
 
 ## 📬 Formulario de contacto
 
-El formulario en `/contacto.html` usa **FormSubmit** (servicio gratuito, sin registro).
+El formulario en `/contacto.html` envía a `info@shevanbarcelona.es` mediante **FormSubmit** (gratuito, sin registro).
 
 **Activación inicial — solo la primera vez:**
-1. Despliega el sitio
-2. Manda un envío de prueba
-3. Llega un email a `info@shevanbarcelona.es` pidiendo confirmación
-4. Click en confirmación → a partir de ese momento, todos los envíos llegan automáticamente
-
-Si quieres cambiar de servicio (Formspree, Mailgun, Netlify Forms, etc.), edita el `action="..."` del `<form>` en `src/builder.py` → `render_contact_page()`.
+1. Manda un envío de prueba desde la web ya desplegada
+2. Llega un email a `info@shevanbarcelona.es` pidiendo confirmación
+3. Click en el enlace de confirmación
+4. A partir de ahí, todos los envíos llegan al email automáticamente
 
 ---
 
 ## 🛠️ Stack técnico
 
-- **Lenguaje**: Python 3.8+ (solo stdlib)
-- **Output**: HTML5 estático + CSS3 + JS mínimo
-- **Tipografías**: Bricolage Grotesque + Inter (Google Fonts, `display=swap`)
-- **Sin dependencias** de Node, npm, frameworks, build tools
-- **Sin tracking** por defecto (añadir Plausible/Analytics manualmente si se quiere)
+- **Lenguaje del generador**: Python 3.8+ (solo stdlib, sin dependencias)
+- **Output**: HTML5 + CSS3 + JS mínimo, todo estático
+- **Tipografías**: Bricolage Grotesque + Inter (Google Fonts)
 
----
-
-## 📄 Licencia
-
-Código y diseño propiedad de SheVan. Uso interno.
+No hace falta Node, npm, frameworks ni nada externo.

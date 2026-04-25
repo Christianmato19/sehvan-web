@@ -1,60 +1,80 @@
 # Guía de despliegue
 
-El sitio se genera como HTML estático puro. **No necesita servidor PHP, base de datos, ni nada especial**. Lo único que tiene que servir el hosting son archivos `.html`, `.css` y `.png`.
+## Opción 1 — GitHub Pages (la más fácil, gratis)
+
+**El repo ya está preparado para esto.** Solo tienes que:
+
+1. Subir el repo a GitHub (ya hecho si estás leyendo esto)
+2. En tu repo → **Settings** → **Pages**
+3. En "Source":
+   - Branch: `main`
+   - Folder: `/ (root)`
+4. Click **Save**
+5. Espera 1–2 minutos
+6. La URL pública aparece en la misma página de Pages, tipo:
+   ```
+   https://tu-usuario.github.io/nombre-del-repo/
+   ```
+
+Esa URL ya es pública. Pasa el link a tu prima, ábrelo en cualquier móvil — funciona.
+
+### Cambios automáticos
+Cada vez que hagas push al branch `main`, GitHub Pages regenera la web automáticamente en 1–2 minutos. No tienes que hacer nada más.
+
+### Dominio propio (shevanbarcelona.es)
+Cuando tu prima tenga el dominio:
+1. En **Settings → Pages**, en "Custom domain" escribe `shevanbarcelona.es`
+2. Configura los DNS del dominio apuntando a GitHub Pages:
+   - Tipo `A` apuntando a las 4 IPs de GitHub:
+     - `185.199.108.153`
+     - `185.199.109.153`
+     - `185.199.110.153`
+     - `185.199.111.153`
+   - O un `CNAME` `www` apuntando a `tu-usuario.github.io`
+3. Activar HTTPS (checkbox en la misma página) — gratis, certificado de Let's Encrypt
 
 ---
 
-## Opción 1 — Netlify (recomendada)
+## Opción 2 — Netlify
 
-**La más fácil.** Gratis, HTTPS automático, dominio incluido (o conectas el tuyo).
+Si prefieres Netlify (a veces más rápido y con mejores herramientas):
 
-1. Genera el sitio: `python build.py`
-2. Ve a [netlify.com](https://netlify.com) y haz cuenta (gratis)
-3. Pestaña "Sites" → arrastra la carpeta `dist/` al área de drop
-4. Listo: te da una URL tipo `https://amazing-tesla-1234.netlify.app`
-5. Para conectar el dominio `shevanbarcelona.es`:
-   - Site settings → Domain management → Add custom domain
-   - Cambiar los DNS según las instrucciones que te dé Netlify
+1. Cuenta gratis en [netlify.com](https://netlify.com)
+2. "Add new site" → "Import from Git" → conecta tu repo de GitHub
+3. Build settings:
+   - Build command: `python build.py`
+   - Publish directory: `.` (raíz)
+4. Deploy → URL inmediata tipo `https://amazing-tesla-1234.netlify.app`
 
-**Para que `/camperizaciones/gran-volumen` funcione sin la extensión `.html`**, crea un archivo `dist/_redirects` con:
+Para dominio propio: igual que en GitHub Pages, "Domain settings" → Add custom domain.
+
+**Para URLs sin `.html`** (ej: `/accesorios/techo-elevable` en vez de `/accesorios/techo-elevable.html`), crea un archivo `_redirects` en la raíz del repo con:
 ```
 /*.html       /:splat       200
 ```
 
 ---
 
-## Opción 2 — Vercel
+## Opción 3 — Vercel
 
-Igual de fácil que Netlify.
+Casi idéntico a Netlify:
 
-1. `python build.py`
-2. [vercel.com](https://vercel.com) → cuenta gratis
-3. "New Project" → arrastra `dist/`
-4. URL inmediata, HTTPS, todo gratis
-
----
-
-## Opción 3 — GitHub Pages
-
-Si ya tienes el repo en GitHub:
-
-1. `python build.py` (genera `dist/`)
-2. Commit y push de `dist/`
-3. En GitHub: Settings → Pages → Source = `main` branch, folder = `/dist`
-4. Pasados 2-3 minutos, el sitio está en `https://<usuario>.github.io/<repo>/`
-
-Para dominio propio: añade un archivo `dist/CNAME` con el contenido `shevanbarcelona.es` y configura los DNS apuntando a GitHub Pages.
+1. Cuenta gratis en [vercel.com](https://vercel.com)
+2. "New Project" → conecta el repo
+3. Framework preset: "Other"
+4. Build command: `python build.py`
+5. Output directory: `.`
+6. Deploy
 
 ---
 
 ## Opción 4 — Hosting tradicional (IONOS, Hostinger, Banahosting…)
 
-1. `python build.py`
-2. Conecta por FTP / sFTP con las credenciales del hosting
-3. Sube **el contenido de `dist/`** (no la carpeta entera, sino lo que hay dentro) a `public_html/` o `www/`
-4. Verifica que el dominio apunte a esa carpeta
+1. Local: `python build.py`
+2. Conecta por FTP
+3. Sube **todos los archivos de la raíz del repo** (excepto `src/`, `assets/`, `build.py`, `README.md` — esos no hacen falta en producción) a `public_html/` o `www/`
 
-Para URLs sin `.html`, crea un `.htaccess` en `public_html/` con:
+Para URLs sin `.html`, crea un `.htaccess` en `public_html/`:
 ```apache
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
@@ -67,14 +87,14 @@ RewriteRule ^(.+)$ $1.html [L]
 
 ## Después de desplegar — checklist
 
-### Paso 1: activar el formulario
-1. Entra en `/contacto.html`
+### Activar el formulario de contacto
+1. Entra en la web desplegada → `/contacto.html`
 2. Manda un envío de prueba con datos reales
 3. Llega un email a `info@shevanbarcelona.es` de FormSubmit pidiendo activar
 4. Click en el enlace de activación
 5. A partir de ahora, los envíos del formulario llegan al email automáticamente
 
-### Paso 2: SEO básico
+### SEO básico
 1. **Google Search Console** ([search.google.com/search-console](https://search.google.com/search-console))
    - Añade el dominio
    - Verifica la propiedad
@@ -86,7 +106,7 @@ RewriteRule ^(.+)$ $1.html [L]
    - Subir fotos del taller, proyectos, equipo
    - Verificar la dirección física
 
-3. **robots.txt** — crear `dist/robots.txt`:
+3. **robots.txt** — crear en la raíz:
    ```
    User-agent: *
    Allow: /
@@ -94,41 +114,18 @@ RewriteRule ^(.+)$ $1.html [L]
    Sitemap: https://shevanbarcelona.es/sitemap.xml
    ```
 
-### Paso 3: contenido pendiente
-Cada página de servicio tiene un placeholder visual donde irá la foto real. Sustituir:
-
-- Cada accesorio → foto del trabajo terminado
-- Cada sección de taller → foto del proceso o herramienta
-- Proyectos → galería real de furgos terminadas
-
-Para sustituir las imágenes, en `src/builder.py` → función `render_detail_page()` busca `<div class="detail-img-placeholder">` y reemplázalo por un `<img src="..." alt="...">` apuntando a las fotos reales.
-
-### Paso 4: páginas legales
-Los enlaces "Aviso legal", "Política de privacidad", "Cookies" en el footer apuntan a `#`. Hay que crear esas páginas (obligatorio en España por RGPD). Lo más rápido es generarlas con [un servicio gratuito](https://www.iubenda.com/) y enlazarlas.
-
----
-
-## Performance esperada
-
-Con el sitio desplegado y compresión activa del hosting:
-
-- **PageSpeed mobile**: 95+
-- **PageSpeed desktop**: 100
-- **Lighthouse SEO**: 100
-- **Tamaño total inicial (sin imágenes)**: ~150KB
-
-Cuando se sustituyan las imágenes placeholder por fotos reales, optimizar siempre con [tinypng.com](https://tinypng.com) y formato WebP donde sea posible.
+### Contenido pendiente
+- Sustituir los placeholders de imágenes por fotos reales con `alt` descriptivo
+- Crear las páginas legales (Aviso legal, Política de privacidad, Cookies — obligatorio en España por RGPD)
 
 ---
 
 ## Regenerar el sitio
 
-Si actualizas contenido en `src/data.py` o tocas estilos en `src/shared.py`:
+Si actualizas algo en `src/data.py` (textos) o `src/shared.py` (estilos / contacto):
 
 ```bash
 python build.py
 ```
 
-Tarda menos de un segundo. Después haces commit del `dist/` actualizado y push.
-
-Si vas a desplegar en Netlify/Vercel con integración de Git, ellos ejecutan el build automáticamente al hacer push — solo configura el comando `python build.py` y el directorio de salida `dist/`.
+Tarda menos de un segundo. Después haces commit + push y GitHub Pages republica solo.
